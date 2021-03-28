@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option go_package = "pb/go/containerhost";
+
+package monocode.proto.containerhost;
+
+// The command plus arguments.
+message StartProcessRequest {
+  string cmd = 1;
+  repeated string args = 2;
+}
+
+// The ID of the command to stop.
+message StopProcessRequest {
+  string id = 1;
+}
+
+// Contains an ID for the process created as a result of
+// executing the command, as well as a chunk of the stdout/stderr output.
+message StartProcessRequestResponse {
+  string id = 1;
+  bytes chunk = 2;
+}
+
+message StopProcessRequestResponse {
+  string id = 1;
+}
+
+service ContainerHost {
+  // Execute a command in the container.
+  rpc StartProcess(StartProcessRequest) returns (stream StartProcessRequestResponse) {}
+
+  // Kill a process using the command ID.
+  rpc StopProcess(StopProcessRequest) returns (StopProcessRequestResponse) {}
+}
