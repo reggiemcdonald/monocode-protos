@@ -19,6 +19,11 @@ import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
 
+import (
+	context "golang.org/x/net/context"
+	grpc "google.golang.org/grpc"
+)
+
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
@@ -119,6 +124,143 @@ func init() {
 	proto.RegisterType((*StopProcessRequest)(nil), "monocode.proto.containerhost.StopProcessRequest")
 	proto.RegisterType((*StartProcessRequestResponse)(nil), "monocode.proto.containerhost.StartProcessRequestResponse")
 	proto.RegisterType((*StopProcessRequestResponse)(nil), "monocode.proto.containerhost.StopProcessRequestResponse")
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion4
+
+// Client API for ContainerHost service
+
+type ContainerHostClient interface {
+	// Execute a command in the container.
+	StartProcess(ctx context.Context, in *StartProcessRequest, opts ...grpc.CallOption) (ContainerHost_StartProcessClient, error)
+	// Kill a process using the command ID.
+	StopProcess(ctx context.Context, in *StopProcessRequest, opts ...grpc.CallOption) (*StopProcessRequestResponse, error)
+}
+
+type containerHostClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewContainerHostClient(cc *grpc.ClientConn) ContainerHostClient {
+	return &containerHostClient{cc}
+}
+
+func (c *containerHostClient) StartProcess(ctx context.Context, in *StartProcessRequest, opts ...grpc.CallOption) (ContainerHost_StartProcessClient, error) {
+	stream, err := grpc.NewClientStream(ctx, &_ContainerHost_serviceDesc.Streams[0], c.cc, "/monocode.proto.containerhost.ContainerHost/StartProcess", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &containerHostStartProcessClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type ContainerHost_StartProcessClient interface {
+	Recv() (*StartProcessRequestResponse, error)
+	grpc.ClientStream
+}
+
+type containerHostStartProcessClient struct {
+	grpc.ClientStream
+}
+
+func (x *containerHostStartProcessClient) Recv() (*StartProcessRequestResponse, error) {
+	m := new(StartProcessRequestResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *containerHostClient) StopProcess(ctx context.Context, in *StopProcessRequest, opts ...grpc.CallOption) (*StopProcessRequestResponse, error) {
+	out := new(StopProcessRequestResponse)
+	err := grpc.Invoke(ctx, "/monocode.proto.containerhost.ContainerHost/StopProcess", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Server API for ContainerHost service
+
+type ContainerHostServer interface {
+	// Execute a command in the container.
+	StartProcess(*StartProcessRequest, ContainerHost_StartProcessServer) error
+	// Kill a process using the command ID.
+	StopProcess(context.Context, *StopProcessRequest) (*StopProcessRequestResponse, error)
+}
+
+func RegisterContainerHostServer(s *grpc.Server, srv ContainerHostServer) {
+	s.RegisterService(&_ContainerHost_serviceDesc, srv)
+}
+
+func _ContainerHost_StartProcess_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(StartProcessRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ContainerHostServer).StartProcess(m, &containerHostStartProcessServer{stream})
+}
+
+type ContainerHost_StartProcessServer interface {
+	Send(*StartProcessRequestResponse) error
+	grpc.ServerStream
+}
+
+type containerHostStartProcessServer struct {
+	grpc.ServerStream
+}
+
+func (x *containerHostStartProcessServer) Send(m *StartProcessRequestResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _ContainerHost_StopProcess_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StopProcessRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContainerHostServer).StopProcess(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/monocode.proto.containerhost.ContainerHost/StopProcess",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContainerHostServer).StopProcess(ctx, req.(*StopProcessRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _ContainerHost_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "monocode.proto.containerhost.ContainerHost",
+	HandlerType: (*ContainerHostServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "StopProcess",
+			Handler:    _ContainerHost_StopProcess_Handler,
+		},
+	},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StartProcess",
+			Handler:       _ContainerHost_StartProcess_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "container_host.proto",
 }
 
 func init() { proto.RegisterFile("container_host.proto", fileDescriptor0) }

@@ -8,7 +8,7 @@ go:
 	rm -rf $(OUTPUT_DIR)/go
 	rm -f ${PWD}/go.*
 	docker run --rm -v ${PWD}:${PWD} -w ${PWD} znly/protoc \
-		--go_out=plgins=grpc:${PWD} \
+		--go_out=plugins=grpc:${PWD} \
 		--go_opt=module=$(MOD) \
 		--proto_path=$(PROTO_DIR) \
 		$(PROTO_DIR)/*.proto
